@@ -1,7 +1,9 @@
 package dev.aravindh.dsa.tree
 
+import arrow.core.Option
+
 interface Node<T> {
-    val parent: Node<T>?
+    val parent: Option<Node<T>>
     val children: List<Node<T>>
     val siblings: List<Node<T>>
     val degree: Int
@@ -17,12 +19,12 @@ interface Node<T> {
 
 interface Tree<T> {
     val width: Int
-    val root: Node<T>?
+    val root: Option<Node<T>>
     val degree: Int
     val depth: Int
     val height: Int
 
     fun insert(value: T)
     fun delete(value: T)
-    fun search(value:T): Node<T>?
+    fun search(value:T): Option<Node<T>>
 }

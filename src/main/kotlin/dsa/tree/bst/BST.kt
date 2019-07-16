@@ -1,13 +1,14 @@
 package dev.aravindh.dsa.tree.bst
 
+import arrow.core.Option
 import dev.aravindh.dsa.tree.Node
 import dev.aravindh.dsa.tree.Tree
 
 data class BSTNode<T : Comparable<T>>(
     val value: T,
-    var left: BSTNode<T>? = null,
-    var right: BSTNode<T>? = null,
-    override var parent: Node<T>?,
+    var left: Option<BSTNode<T>>,
+    var right: Option<BSTNode<T>>,
+    override var parent: Option<Node<T>>,
     override var children: List<Node<T>>,
     override var siblings: List<Node<T>>,
     override var degree: Int,
@@ -19,69 +20,71 @@ data class BSTNode<T : Comparable<T>>(
     override var height: Int
 ) : Node<T> {
     init {
-        this.isLeaf = this.left == null && this.right == null && this.parent != null
-        this.isInternal = this.left != null && this.right != null
+        this.isLeaf = this.left.isEmpty() && this.right.isEmpty() && this.parent.isDefined()
+        this.isInternal = this.left.isDefined() && this.right.isDefined()
     }
-    constructor(value: T, left: BSTNode<T>? = null, right: BSTNode<T>? = null) :
-            this(value, left, right, null, emptyList(), emptyList(), 0, false, false, false, 0, 0, 0)
+
+    constructor(value: T, left: Option<BSTNode<T>> = Option.empty(), right: Option<BSTNode<T>> = Option.empty()) :
+            this(value, left, right, Option.empty(), emptyList(), emptyList(), 0, false, false, false, 0, 0, 0)
 
     fun insert(value: T) {
         if (this.value > value) {
-            if (this.left != null) {
-                this.left?.insert(value)
+            if (this.left.isDefined()) {
+                this.left.map { it.insert(value) }
             } else {
-                this.left = BSTNode(value)
+                this.left = Option.just(BSTNode(value))
             }
         } else if (this.value < value) {
-            if (this.right != null) {
-                this.right!!.insert(value)
+            if (this.right.isDefined()) {
+                this.right.map { it.insert(value) }
             } else {
-                this.right = BSTNode(value)
+                this.right = Option.just(BSTNode(value))
             }
         }
     }
 
-    fun search(value: T): BSTNode<T>? {
+    fun search(value: T): Option<BSTNode<T>> {
         return if (this.value > value) {
-            if (this.left != null) {
-                this.left!!.search(value)
+            if (this.left.isDefined()) {
+                this.left.flatMap { it.search(value) }
             } else {
-                null
+                Option.empty()
             }
         } else if (this.value < value) {
-            if (this.right != null) {
-                this.right!!.search(value)
+            if (this.right.isDefined()) {
+                this.right.flatMap { it.search(value) }
             } else {
-                null
+                Option.empty()
             }
         } else {
-            this
+            Option.empty()
         }
     }
 
-    override fun deleteLeftChild(){
-        this.left = null
+    override fun deleteLeftChild() {
+        this.left = Option.empty()
     }
-    override fun deleteRightChild(){
-        this.right = null
+
+    override fun deleteRightChild() {
+        this.right = Option.empty()
     }
 }
 
 data class BST<T : Comparable<T>>(val value: T) : Tree<T> {
-    override var root: BSTNode<T>? = BSTNode(value, null, null)
-    override fun search(value: T): BSTNode<T>? {
-        return if (this.root != null) {
-            this.root!!.search(value)
+    override var root: Option<BSTNode<T>> = Option.just(BSTNode(value))
+    override fun search(value: T): Option<BSTNode<T>> {
+        return if (this.root.isDefined()) {
+            this.root.flatMap { it.search(value) }
         } else {
-            null
+            Option.empty()
         }
     }
 
     override fun delete(value: T) {
         val maybeNode = this.search(value)
-       if (maybeNode != null){
-           maybeNode.parent!!.deleteLeftChild()
-       }
+        if (maybeNode.isDefined()) {
+            maybeNode.map { node -> node.parent.map { parent -> parent.deleteLeftChild() } }
+        }
     }
 
     override val width: Int = 0
@@ -90,10 +93,10 @@ data class BST<T : Comparable<T>>(val value: T) : Tree<T> {
     override val height: Int = 0
 
     override fun insert(value: T) {
-        if (this.root != null) {
-            this.root!!.insert(value)
+        if (this.root.isDefined()) {
+            this.root.map { it.insert(value) }
         } else {
-            this.root = BSTNode(value)
+            this.root = Option.just(BSTNode(value))
         }
     }
 
