@@ -1,4 +1,4 @@
-package dev.aravindh.src.main.kotlin.tree
+package dev.aravindh.dsa.tree
 
 interface Node<T> {
     val parent: Node<T>?

@@ -1,6 +1,7 @@
-package dev.aravindh.src.main.kotlin.tree.bst
+package dev.aravindh.dsa.tree.bst
 
-import dev.aravindh.src.main.kotlin.tree.*
+import dev.aravindh.dsa.tree.Node
+import dev.aravindh.dsa.tree.Tree
 
 data class BSTNode<T : Comparable<T>>(
     val value: T,
